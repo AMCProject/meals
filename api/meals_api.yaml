@@ -45,6 +45,7 @@ paths:
         - $ref: '#/components/parameters/mealName'
         - $ref: '#/components/parameters/mealType'
         - $ref: '#/components/parameters/healthy'
+        - $ref: '#/components/parameters/season'
       tags:
         - Meals
       summary: List all meals from User
@@ -135,14 +136,22 @@ components:
         image:
           type: string
           example: image.jpg
-        kcal:
-          type: integer
-          example: 340
+        type:
+          type: string
+          example: standard
         ingredients:
           type: array
           example:
             - Eggs
             - Bacon
+        kcal:
+          type: integer
+          example: 340
+        seasons:
+          type: array
+          example:
+            - winter
+            - spring
     MealResponse:
       title: Meal Response
       type: object
@@ -162,14 +171,22 @@ components:
         image:
           type: string
           example: image.jpg
-        kcal:
-          type: integer
-          example: 340
+        type:
+          type: string
+          example: standard
         ingredients:
           type: array
           example:
             - Eggs
             - Bacon
+        kcal:
+          type: integer
+          example: 340
+        seasons:
+          type: array
+          example:
+            - winter
+            - spring
     MealsList:
       title: Meals List
       properties:
@@ -197,14 +214,17 @@ components:
             image:
               type: string
               example: image.jpg
-            kcal:
-              type: integer
-              example: 340
             ingredients:
               type: array
               example:
                 - Eggs
                 - Bacon
+            kcal:
+              type: integer
+              example: 340
+            type:
+              type: string
+              example: standard
           - name:
               type: string
               example: MySecondFood
@@ -214,14 +234,22 @@ components:
             image:
               type: string
               example: image2.jpg
-            kcal:
-              type: integer
-              example: 80
             ingredients:
               type: array
               example:
                 - Onion
                 - Tomato
+            kcal:
+              type: integer
+              example: 80
+            type:
+              type: string
+              example: weekly
+            seasons:
+              type: array
+              example:
+                - winter
+                - spring
         paging:
           next_cursor: ''
           previous_cursor: ''
@@ -256,26 +284,41 @@ components:
         type: string
         example: 1234
     mealName:
-      in: path
+      in: query
       name: name
       required: false
       schema:
         type: string
         example: fish and chips
     mealType:
-      in: path
+      in: query
       name: type
       required: false
       schema:
         type: string
         example: weekly
     healthy:
-      in: path
+      in: query
       name: healthy
       required: false
       schema:
         type: boolean
         example: false
+    season:
+      in: query
+      name: "season[]"
+      schema:
+        type: array
+        items:
+          type: string
+      description: Filter by multiple seasons
+      examples:
+        oneId:
+          summary: Example of a single Season
+          value: [ "winter" ] # ?season[]=winter
+        multipleIds:
+          summary: Example of multiple Seasons
+          value: [ "winter", "spring" ] # ?season[]=winter&season[]=spring
   responses:
     BadRequest:
       description: Payload format error

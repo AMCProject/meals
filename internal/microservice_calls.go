@@ -2,10 +2,9 @@ package internal
 
 import (
 	"encoding/json"
+	"meals/internal/config"
 	"net/http"
 )
-
-const userUrl = "http://localhost:3100/"
 
 type Endpoints struct {
 }
@@ -17,7 +16,7 @@ type EndpointsI interface {
 var httpClient = &http.Client{}
 
 func (e *Endpoints) GetUser(userId string) (user User, err error) {
-	request, err := http.NewRequest(http.MethodGet, userUrl+"user/"+userId, nil)
+	request, err := http.NewRequest(http.MethodGet, config.Config.UsersURL+"user/"+userId, nil)
 	if err != nil {
 		return
 	}
