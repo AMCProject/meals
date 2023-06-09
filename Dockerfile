@@ -7,5 +7,6 @@ RUN go build -mod=mod -o /bin/app cmd/meal/main.go
 
 FROM gcr.io/distroless/base-debian11
 COPY --from=builder /bin/app /bin/app
+COPY internal/config/.env ./internal/config/.env
 
 CMD ["/bin/app"]
