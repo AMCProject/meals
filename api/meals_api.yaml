@@ -93,6 +93,13 @@ paths:
         - Meals
       summary: Update Meal Information
       operationId: PutMeal
+      requestBody:
+        description: 'Body to update a Meal'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MealRequest'
+        required: true
       responses:
         200:
           description: OK
