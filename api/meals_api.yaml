@@ -1,0 +1,319 @@
+openapi: 3.0.3
+info:
+  title: Meals API
+  description: Meals OpenAPI endpoints
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:3200
+    description: Local
+tags:
+  - name: Meals
+    description: Operations about Meals
+paths:
+  /user/{user_id}/meal:
+    parameters:
+      - $ref: '#/components/parameters/userId'
+    post:
+      tags:
+        - Meals
+      summary: Create a new Meal
+      operationId: CreateMeal
+      requestBody:
+        description: 'Body of new Meal'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MealRequest'
+        required: true
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/ServerError'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/mealName'
+        - $ref: '#/components/parameters/mealType'
+        - $ref: '#/components/parameters/healthy'
+      tags:
+        - Meals
+      summary: List all meals from User
+      operationId: ListMeals
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealsList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /user/{user_id}/meal/{id}:
+    parameters:
+      - $ref: '#/components/parameters/userId'
+      - $ref: '#/components/parameters/mealId'
+    get:
+      tags:
+        - Meals
+      summary: Get Meal Information
+      operationId: GetMeal
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags:
+        - Meals
+      summary: Update Meal Information
+      operationId: PutMeal
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Meals
+      summary: Delete Meal
+      operationId: DeleteMeal
+      responses:
+        204:
+          description: The meal was deleted successfully.
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    MealRequest:
+      title: Meal Request
+      type: object
+      properties:
+        name:
+          type: string
+          example: MyFood
+        description:
+          type: string
+          example: This food is delicious!
+        image:
+          type: string
+          example: image.jpg
+        kcal:
+          type: integer
+          example: 340
+        ingredients:
+          type: array
+          example:
+            - Eggs
+            - Bacon
+    MealResponse:
+      title: Meal Response
+      type: object
+      properties:
+        id:
+          type: string
+          example: 1234
+        userId:
+          type: string
+          example: 01H00Q44V18CKXHMY7FEJ2876S
+        name:
+          type: string
+          example: MyFood
+        description:
+          type: string
+          example: This food is delicious!
+        image:
+          type: string
+          example: image.jpg
+        kcal:
+          type: integer
+          example: 340
+        ingredients:
+          type: array
+          example:
+            - Eggs
+            - Bacon
+    MealsList:
+      title: Meals List
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealResponse'
+        paging:
+          type: object
+          properties:
+            next_cursor:
+              type: string
+              example: ''
+            previous_cursor:
+              type: string
+              example: ''
+      example:
+        data:
+          - name:
+              type: string
+              example: MyFood
+            description:
+              type: string
+              example: This food is delicious!
+            image:
+              type: string
+              example: image.jpg
+            kcal:
+              type: integer
+              example: 340
+            ingredients:
+              type: array
+              example:
+                - Eggs
+                - Bacon
+          - name:
+              type: string
+              example: MySecondFood
+            description:
+              type: string
+              example: This food is also delicious!
+            image:
+              type: string
+              example: image2.jpg
+            kcal:
+              type: integer
+              example: 80
+            ingredients:
+              type: array
+              example:
+                - Onion
+                - Tomato
+        paging:
+          next_cursor: ''
+          previous_cursor: ''
+    ErrorResponse:
+      title: Error Response
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            status:
+              type: integer
+              format: int64
+              example: 400
+            message:
+              type: string
+              example: invalid id
+
+  parameters:
+    userId:
+      in: path
+      name: user_id
+      required: true
+      schema:
+        type: string
+        example: 01H00Q44V18CKXHMY7FEJ2876S
+    mealId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        example: 1234
+    mealName:
+      in: path
+      name: name
+      required: false
+      schema:
+        type: string
+        example: fish and chips
+    mealType:
+      in: path
+      name: type
+      required: false
+      schema:
+        type: string
+        example: weekly
+    healthy:
+      in: path
+      name: healthy
+      required: false
+      schema:
+        type: boolean
+        example: false
+  responses:
+    BadRequest:
+      description: Payload format error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              status: 400
+              message: malformed body
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              status: 404
+              message: Not found
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              status: 409
+              message: Conflict
+    ServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              status: 500
+              message: Internal Server Error

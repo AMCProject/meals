@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  amc_meal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: amc_meal
+    init: true
+    restart: unless-stopped
+    ports:
+      - "3200:3200"
