@@ -30,8 +30,8 @@ func (s *MealAPITestSuite) SetupTest() {
 	Microservices = s.httpMock
 	_ = database.RemoveDB(databaseTest)
 	s.db = database.InitDB(databaseTest)
-	s.db.Conn.Exec(createMeal, "01FN3EEB2NVFJAHAPM00000001", "01FN3EEB2NVFJAHAPU00000001", "pizza", "", "", "occasional", "Tomate,Queso,Pollo", 130, true)
-	s.db.Conn.Exec(createMeal, "01FN3EEB2NVFJAHAPM00000002", "01FN3EEB2NVFJAHAPU00000001", "ensalada", "", "", "weekly", "Tomate,Lechuga,Cebolla,Aguacate", 100, false)
+	s.db.Conn.Exec(createMeal, "01FN3EEB2NVFJAHAPM00000001", "01FN3EEB2NVFJAHAPU00000001", "pizza", "", "", "occasional", "Tomate,Queso,Pollo", 130, "winter,summer")
+	s.db.Conn.Exec(createMeal, "01FN3EEB2NVFJAHAPM00000002", "01FN3EEB2NVFJAHAPU00000001", "ensalada", "", "", "weekly", "Tomate,Lechuga,Cebolla,Aguacate", 100, "general")
 }
 
 func (s *MealAPITestSuite) TearDownTest() {
@@ -58,6 +58,7 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 				Image:       "",
 				Type:        "occasional",
 				Ingredients: []string{"Patata frita", "Huevo frito"},
+				Seasons:     []string{"general"},
 			},
 			expectedULID: ulid.MustParse("01FN3EEB2NVFJAHAPM00000003"),
 			expectedResp: &Meal{
@@ -68,6 +69,7 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 				Type:        "occasional",
 				Ingredients: []string{"Patata frita", "Huevo frito"},
 				Kcal:        652,
+				Seasons:     []string{"general"},
 			},
 			expectedStatusCode: http.StatusCreated,
 			wantErr:            false,
@@ -82,6 +84,7 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 				Type:        "occasional",
 				Ingredients: []string{"Patata frita, Huevo frito"},
 				Kcal:        320,
+				Seasons:     []string{"general"},
 			},
 			expectedResp: &ErrorResponse{
 				Err: ErrorBody{
@@ -188,7 +191,7 @@ func (s *MealAPITestSuite) TestGetMealHandler() {
 				Type:        "occasional",
 				Ingredients: []string{"Tomate", "Queso", "Pollo"},
 				Kcal:        130,
-				Active:      true,
+				Seasons:     []string{"winter", "summer"},
 			},
 			expectedStatusCode: http.StatusOK,
 			wantErr:            false,
@@ -296,7 +299,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Type:        "occasional",
 					Ingredients: []string{"Tomate", "Queso", "Pollo"},
 					Kcal:        130,
-					Active:      true,
+					Seasons:     []string{"winter", "summer"},
 				},
 				{
 					Id:          "01FN3EEB2NVFJAHAPM00000002",
@@ -306,7 +309,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Type:        "weekly",
 					Ingredients: []string{"Tomate", "Lechuga", "Cebolla", "Aguacate"},
 					Kcal:        100,
-					Active:      false,
+					Seasons:     []string{"general"},
 				},
 			},
 			expectedStatusCode: http.StatusOK,
@@ -327,7 +330,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Type:        "occasional",
 					Ingredients: []string{"Tomate", "Queso", "Pollo"},
 					Kcal:        130,
-					Active:      true,
+					Seasons:     []string{"winter", "summer"},
 				},
 			},
 			expectedStatusCode: http.StatusOK,
@@ -348,7 +351,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Type:        "weekly",
 					Ingredients: []string{"Tomate", "Lechuga", "Cebolla", "Aguacate"},
 					Kcal:        100,
-					Active:      false,
+					Seasons:     []string{"general"},
 				},
 			},
 			expectedStatusCode: http.StatusOK,
@@ -369,7 +372,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Type:        "weekly",
 					Ingredients: []string{"Tomate", "Lechuga", "Cebolla", "Aguacate"},
 					Kcal:        100,
-					Active:      false,
+					Seasons:     []string{"general"},
 				},
 				{
 					Id:          "01FN3EEB2NVFJAHAPM00000001",
@@ -379,16 +382,16 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Type:        "occasional",
 					Ingredients: []string{"Tomate", "Queso", "Pollo"},
 					Kcal:        130,
-					Active:      true,
+					Seasons:     []string{"winter", "summer"},
 				},
 			},
 			expectedStatusCode: http.StatusOK,
 			wantErr:            false,
 		},
 		{
-			name: "List meals filtered by active (ok)",
+			name: "List meals filtered by seasons (ok)",
 			filters: map[string][]string{
-				"active": {"true"},
+				"[]season": {"winter"},
 			},
 			userID: "01FN3EEB2NVFJAHAPU00000001",
 			expectedResp: &[]Meal{
@@ -400,7 +403,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Type:        "occasional",
 					Ingredients: []string{"Tomate", "Queso", "Pollo"},
 					Kcal:        130,
-					Active:      true,
+					Seasons:     []string{"winter", "summer"},
 				},
 			},
 			expectedStatusCode: http.StatusOK,
@@ -487,7 +490,7 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 				Image:       "",
 				Type:        "occasional",
 				Ingredients: []string{"Tomate", "Queso"},
-				Active:      false,
+				Seasons:     []string{"winter", "summer"},
 			},
 			expectedResp: &Meal{
 				Id:          "01FN3EEB2NVFJAHAPM00000001",
@@ -497,7 +500,7 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 				Type:        "occasional",
 				Ingredients: []string{"Tomate", "Queso"},
 				Kcal:        322,
-				Active:      false,
+				Seasons:     []string{"winter", "summer"},
 			},
 			expectedStatusCode: http.StatusOK,
 			wantErr:            false,
@@ -539,6 +542,7 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 				Type:        "occasional",
 				Ingredients: []string{"Tomate", "Queso"},
 				Kcal:        100,
+				Seasons:     []string{"winter"},
 			},
 			expectedResp: &ErrorResponse{
 				Err: ErrorBody{
