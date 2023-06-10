@@ -165,7 +165,7 @@ components:
       properties:
         id:
           type: string
-          example: 1234
+          example: 01H2G2C5NP5JHRW46A137YPE8F
         userId:
           type: string
           example: 01H00Q44V18CKXHMY7FEJ2876S
@@ -289,7 +289,7 @@ components:
       required: true
       schema:
         type: string
-        example: 1234
+        example: 01H2G2C5NP5JHRW46A137YPE8F
     mealName:
       in: query
       name: name
