@@ -23,6 +23,10 @@ var scripts = []DbScript{
 		Script:      calendars,
 		Description: "calendars table",
 	},
+	{
+		Script:      addNameToCalendars,
+		Description: "add name column to calendar",
+	},
 }
 var version = `
 CREATE TABLE IF NOT EXISTS db_version (
@@ -61,3 +65,7 @@ CREATE TABLE IF NOT EXISTS calendar (
 	date	    text   NOT NULL,
 	PRIMARY KEY (user_id,date)
 );`
+
+var addNameToCalendars = `
+ALTER TABLE calendar ADD name text NOT NULL;
+`
