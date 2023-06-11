@@ -53,7 +53,7 @@ type MealDB struct {
 
 type Meal struct {
 	Id          string   `json:"id"`
-	UserId      string   `json:"userId"`
+	UserId      string   `json:"user_id"`
 	Name        string   `json:"name" validate:"required"`
 	Description string   `json:"description"`
 	Image       string   `json:"image"`
