@@ -6,8 +6,9 @@ import (
 )
 
 type MealManager struct {
-	db       *SQLiteMealRepository
-	validate *validator.Validate
+	db             *SQLiteMealRepository
+	validate       *validator.Validate
+	allIngredients map[string]int
 }
 
 var Microservices EndpointsI = &Endpoints{}
@@ -15,7 +16,6 @@ var Microservices EndpointsI = &Endpoints{}
 type IMealManager interface {
 	GetMeal(userID, mealID string) (meal *Meal, err error)
 	ListMeals(userID string, filters *MealsFilters) (meals []*Meal, err error)
-	GetOtherMeals(userID string) (meals []*Meal, err error)
 	UpdateMeal(userID string, mealID string, mealPut Meal) (meal *Meal, err error)
 	CreateMeal(userID string, mealPost Meal) (meal *Meal, err error)
 	DeleteMeal(userID, mealID string) (err error)
@@ -23,8 +23,9 @@ type IMealManager interface {
 
 func NewMealManager(db database.Database) *MealManager {
 	return &MealManager{
-		db:       NewSQLiteMealRepository(&db),
-		validate: validator.New(),
+		db:             NewSQLiteMealRepository(&db),
+		validate:       validator.New(),
+		allIngredients: GetAllIngredients(),
 	}
 }
 
@@ -44,10 +45,6 @@ func (m *MealManager) ListMeals(userID string, filters *MealsFilters) (meals []*
 	return m.db.ListMeals(userID, *filters)
 }
 
-func (m *MealManager) GetOtherMeals(userID string) (meals []*Meal, err error) {
-	return m.db.GetOtherMeals(userID)
-}
-
 // UpdateMeal function to update the meal selected (if any parameter is missing we get the oldest ones
 func (m *MealManager) UpdateMeal(userID string, mealID string, mealPut Meal) (meal *Meal, err error) {
 	if _, err = Microservices.GetUser(userID); err != nil {
@@ -64,9 +61,9 @@ func (m *MealManager) UpdateMeal(userID string, mealID string, mealPut Meal) (me
 
 	var kcal int
 	for _, ing := range mealPut.Ingredients {
-		kcal += Ingredients[ing]
+		kcal += m.allIngredients[ing]
 	}
-	mealPut.Kcal = kcal
+	mealPut.Kcal = kcal / len(mealPut.Ingredients)
 
 	meal, err = m.db.UpdateMeal(userID, mealID, mealPut)
 	if err != nil {
@@ -92,9 +89,9 @@ func (m *MealManager) CreateMeal(userID string, mealPost Meal) (meal *Meal, err 
 	}
 	var kcal int
 	for _, ing := range mealPost.Ingredients {
-		kcal += Ingredients[ing]
+		kcal += m.allIngredients[ing]
 	}
-	mealPost.Kcal = kcal
+	mealPost.Kcal = kcal / len(mealPost.Ingredients)
 
 	return m.db.CreateMeal(userID, mealPost)
 }
@@ -114,4 +111,14 @@ func (m *MealManager) DeleteMeal(userID, mealID string) (err error) {
 		return err
 	}
 	return
+}
+
+func GetAllIngredients() map[string]int {
+	allIngredients := make(map[string]int)
+	for _, ing := range Ingredients {
+		for value, key := range ing {
+			allIngredients[value] = key
+		}
+	}
+	return allIngredients
 }

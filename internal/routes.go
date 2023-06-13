@@ -52,6 +52,7 @@ var errorsMap = map[string]ErrorBody{
 	ErrSomethingWentWrong.Error(): {Status: http.StatusInternalServerError, Message: ErrSomethingWentWrong.Error()},
 	ErrWrongBody.Error():          {Status: http.StatusBadRequest, Message: ErrWrongBody.Error()},
 	ErrMealNotFound.Error():       {Status: http.StatusNotFound, Message: ErrMealNotFound.Error()},
+	ErrMealsNotFound.Error():      {Status: http.StatusNotFound, Message: ErrMealsNotFound.Error()},
 	ErrUserNotFound.Error():       {Status: http.StatusNotFound, Message: ErrUserNotFound.Error()},
 }
 var (
@@ -62,4 +63,5 @@ var (
 	ErrWrongBody          = errors.New("malformed body")
 	ErrMealNotFound       = errors.New("meal not found")
 	ErrUserNotFound       = errors.New("user not found")
+	ErrMealsNotFound      = errors.New("meals not found")
 )

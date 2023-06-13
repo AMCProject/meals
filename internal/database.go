@@ -15,8 +15,6 @@ const (
 	updateMeal = "UPDATE meals SET name = ?, description = ?, image = ?, type = ?, ingredients = ?, kcal = ?, seasons = ? WHERE user_id = ? AND id = ?"
 	createMeal = "INSERT INTO meals(id,user_id,name,description,image,type,ingredients,kcal,seasons) VALUES (?,?,?,?,?,?,?,?,?)"
 	deleteMeal = "DELETE FROM meals WHERE user_id = ? AND id = ?"
-
-	otherMeals = "SELECT * FROM meals WHERE user_id != ? ORDER BY saves DESC"
 )
 
 type MealRepository interface {
@@ -25,9 +23,6 @@ type MealRepository interface {
 	UpdateMeal(userID string, mealID string, mealPut Meal) (meal *Meal, err error)
 	CreateMeal(userID string, mealPost Meal) (meal *Meal, err error)
 	DeleteMeal(userID, mealID string) (err error)
-
-	GetOtherMeals(userId string) (meals []*Meal, err error)
-	ChangeSaves(userId string, name string, saves int) (err error)
 }
 
 type SQLiteMealRepository struct {
@@ -61,6 +56,9 @@ func (r *SQLiteMealRepository) ListMeals(userId string, filters MealsFilters) (m
 		log.Error(err)
 		return nil, ErrSomethingWentWrong
 	}
+	if len(mealsDB) == 0 {
+		return nil, ErrMealNotFound
+	}
 	for _, m := range mealsDB {
 		meals = append(meals, MealToAPI(&m))
 	}
@@ -92,24 +90,6 @@ func (r *SQLiteMealRepository) UpdateMeal(userID string, mealID string, mealUpda
 
 func (r *SQLiteMealRepository) DeleteMeal(userID, mealID string) (err error) {
 	_, err = r.db.Conn.Exec(deleteMeal, userID, mealID)
-	if err != nil {
-		log.Error(err)
-		return ErrSomethingWentWrong
-	}
-	return
-}
-
-func (r *SQLiteMealRepository) GetOtherMeals(userId string) (meals []*Meal, err error) {
-	err = r.db.Conn.Select(&meals, otherMeals, userId)
-	if err != nil {
-		log.Error(err)
-		return nil, ErrSomethingWentWrong
-	}
-	return
-}
-
-func (r *SQLiteMealRepository) ChangeSaves(userId string, name string, saves int) (err error) {
-	_, err = r.db.Conn.Exec("UPDATE meals SET saves = ? WHERE user_id = ? AND name = ?", saves, userId, name)
 	if err != nil {
 		log.Error(err)
 		return ErrSomethingWentWrong

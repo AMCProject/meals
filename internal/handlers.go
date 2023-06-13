@@ -122,22 +122,6 @@ func (a *MealAPI) GetIngredients(c echo.Context) error {
 	return c.JSON(http.StatusOK, Ingredients)
 }
 
-func (a *MealAPI) GetOtherMeals(c echo.Context) error {
-	var userID string
-	if err := url.ParseURLPath(c, url.PathMap{
-		ParamUserID: {Target: &userID, Err: ErrUserIDNotPresent},
-	}); err != nil {
-		return NewErrorResponse(c, err)
-	}
-
-	allMeals, err := a.Manager.GetOtherMeals(userID)
-	if err != nil {
-		return NewErrorResponse(c, err)
-	}
-	return c.JSON(http.StatusOK, allMeals)
-
-}
-
 func cleanMeal(meal *Meal) {
 	meal.UserId = "" // Remove userID to prevent it from being serialized to JSON
 }
