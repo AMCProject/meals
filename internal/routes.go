@@ -33,6 +33,12 @@ type ErrorBody struct {
 
 func NewErrorResponse(c echo.Context, err error) error {
 	errResponse := &ErrorResponse{Err: errorsMap[err.Error()]}
+	if errResponse.Err.Status == 0 {
+		if err := c.JSON(http.StatusInternalServerError, err); err != nil {
+			return err
+		}
+		return err
+	}
 	if err := c.JSON(errResponse.Err.Status, errResponse); err != nil {
 		return err
 	}

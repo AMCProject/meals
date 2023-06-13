@@ -17,6 +17,8 @@ type Configuration struct {
 	DBName string `mapstructure:"DB_NAME" json:"DBName" default:"amc.db"`
 	// UsersURL --> URL of the users microservice
 	UsersURL string `mapstructure:"USERS_URL" json:"UsersURL" default:"0.0.0.0:3100"`
+	// CalendarsURL --> URL of the users microservice
+	CalendarsURL string `mapstructure:"CALENDARS_URL" json:"CalendarsURL" default:"0.0.0.0:3300"`
 }
 
 func LoadConfiguration() error {
@@ -29,5 +31,6 @@ func LoadConfiguration() error {
 	Config.Port = os.Getenv("PORT")
 	Config.DBName = os.Getenv("DB_NAME")
 	Config.UsersURL = os.Getenv("USERS_URL")
+	Config.CalendarsURL = os.Getenv("CALENDARS_URL")
 	return nil
 }

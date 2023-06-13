@@ -57,16 +57,27 @@ func (m *MealManager) UpdateMeal(userID string, mealID string, mealPut Meal) (me
 	if err = m.validate.Struct(mealPut); err != nil {
 		return nil, err
 	}
-	if _, err = m.db.GetMeal(userID, mealID); err != nil {
+	mealGet, err := m.db.GetMeal(userID, mealID)
+	if err != nil {
 		return nil, err
 	}
+
 	var kcal int
 	for _, ing := range mealPut.Ingredients {
 		kcal += Ingredients[ing]
 	}
 	mealPut.Kcal = kcal
 
-	return m.db.UpdateMeal(userID, mealID, mealPut)
+	meal, err = m.db.UpdateMeal(userID, mealID, mealPut)
+	if err != nil {
+		return nil, err
+	}
+	if meal.Name != mealGet.Name {
+		if err = Microservices.GetCalendar(userID, *meal, false); err != nil {
+			return nil, err
+		}
+	}
+	return
 
 }
 
@@ -96,5 +107,11 @@ func (m *MealManager) DeleteMeal(userID, mealID string) (err error) {
 	if _, err = m.db.GetMeal(userID, mealID); err != nil {
 		return err
 	}
-	return m.db.DeleteMeal(userID, mealID)
+	if err = m.db.DeleteMeal(userID, mealID); err != nil {
+		return err
+	}
+	if err = Microservices.GetCalendar(userID, Meal{Id: mealID}, true); err != nil {
+		return err
+	}
+	return
 }
