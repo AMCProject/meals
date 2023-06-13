@@ -49,6 +49,9 @@ func (e *Endpoints) GetCalendar(userId string, meal Meal, delete bool) (err erro
 	if err != nil {
 		return err
 	}
+	if response.StatusCode == 404 {
+		return
+	}
 	if response.StatusCode > 299 {
 		newError := new(ErrorResponse)
 		err = json.NewDecoder(response.Body).Decode(&newError)
