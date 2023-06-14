@@ -30,8 +30,8 @@ func (s *MealAPITestSuite) SetupTest() {
 	Microservices = s.httpMock
 	_ = database.RemoveDB(databaseTest)
 	s.db = database.InitDB(databaseTest)
-	s.db.Conn.Exec(createMeal, "01FN3EEB2NVFJAHAPM00000001", "01FN3EEB2NVFJAHAPU00000001", "pizza", "", "", "occasional", "Tomate,Queso,Pollo", 130, "winter,summer")
-	s.db.Conn.Exec(createMeal, "01FN3EEB2NVFJAHAPM00000002", "01FN3EEB2NVFJAHAPU00000001", "ensalada", "", "", "weekly", "Tomate,Lechuga,Cebolla,Aguacate", 100, "general")
+	s.db.Conn.Exec(createMeal, "01FN3EEB2NVFJAHAPM00000001", "01FN3EEB2NVFJAHAPU00000001", "pizza", "", "", "ocasional", "Tomate,Queso,Pollo", 130, "invierno,verano")
+	s.db.Conn.Exec(createMeal, "01FN3EEB2NVFJAHAPM00000002", "01FN3EEB2NVFJAHAPU00000001", "ensalada", "", "", "semanal", "Tomate,Lechuga,Cebolla,Aguacate", 100, "general")
 }
 
 func (s *MealAPITestSuite) TearDownTest() {
@@ -53,22 +53,22 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 			name:   "[001] Create new meal (ok)",
 			userId: "01FN3EEB2NVFJAHAPU00000001",
 			reqBody: &Meal{
-				Name:        "fried eggs",
+				Name:        "Huevos fritos con patatas",
 				Description: "",
 				Image:       "",
-				Type:        "occasional",
+				Type:        "ocasional",
 				Ingredients: []string{"Patata frita", "Huevo frito"},
 				Seasons:     []string{"general"},
 			},
 			expectedULID: ulid.MustParse("01FN3EEB2NVFJAHAPM00000003"),
 			expectedResp: &Meal{
 				Id:          "01FN3EEB2NVFJAHAPM00000003",
-				Name:        "fried eggs",
+				Name:        "Huevos fritos con patatas",
 				Description: "",
 				Image:       "",
-				Type:        "occasional",
+				Type:        "ocasional",
 				Ingredients: []string{"Patata frita", "Huevo frito"},
-				Kcal:        652,
+				Kcal:        208,
 				Seasons:     []string{"general"},
 			},
 			expectedStatusCode: http.StatusCreated,
@@ -81,7 +81,7 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 				UserId:      "01FN3EEB2NVFJAHAPU00000004",
 				Description: "",
 				Image:       "",
-				Type:        "occasional",
+				Type:        "ocasional",
 				Ingredients: []string{"Patata frita, Huevo frito"},
 				Kcal:        320,
 				Seasons:     []string{"general"},
@@ -188,10 +188,10 @@ func (s *MealAPITestSuite) TestGetMealHandler() {
 				Name:        "pizza",
 				Description: "",
 				Image:       "",
-				Type:        "occasional",
+				Type:        "ocasional",
 				Ingredients: []string{"Tomate", "Queso", "Pollo"},
 				Kcal:        130,
-				Seasons:     []string{"winter", "summer"},
+				Seasons:     []string{"invierno", "verano"},
 			},
 			expectedStatusCode: http.StatusOK,
 			wantErr:            false,
@@ -296,17 +296,17 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Name:        "pizza",
 					Description: "",
 					Image:       "",
-					Type:        "occasional",
+					Type:        "ocasional",
 					Ingredients: []string{"Tomate", "Queso", "Pollo"},
 					Kcal:        130,
-					Seasons:     []string{"winter", "summer"},
+					Seasons:     []string{"invierno", "verano"},
 				},
 				{
 					Id:          "01FN3EEB2NVFJAHAPM00000002",
 					Name:        "ensalada",
 					Description: "",
 					Image:       "",
-					Type:        "weekly",
+					Type:        "semanal",
 					Ingredients: []string{"Tomate", "Lechuga", "Cebolla", "Aguacate"},
 					Kcal:        100,
 					Seasons:     []string{"general"},
@@ -327,10 +327,10 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Name:        "pizza",
 					Description: "",
 					Image:       "",
-					Type:        "occasional",
+					Type:        "ocasional",
 					Ingredients: []string{"Tomate", "Queso", "Pollo"},
 					Kcal:        130,
-					Seasons:     []string{"winter", "summer"},
+					Seasons:     []string{"invierno", "verano"},
 				},
 			},
 			expectedStatusCode: http.StatusOK,
@@ -339,7 +339,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 		{
 			name: "List meals filtered by type (ok)",
 			filters: map[string][]string{
-				"type": {"weekly"},
+				"type": {"semanal"},
 			},
 			userID: "01FN3EEB2NVFJAHAPU00000001",
 			expectedResp: &[]Meal{
@@ -348,7 +348,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Name:        "ensalada",
 					Description: "",
 					Image:       "",
-					Type:        "weekly",
+					Type:        "semanal",
 					Ingredients: []string{"Tomate", "Lechuga", "Cebolla", "Aguacate"},
 					Kcal:        100,
 					Seasons:     []string{"general"},
@@ -369,7 +369,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Name:        "ensalada",
 					Description: "",
 					Image:       "",
-					Type:        "weekly",
+					Type:        "semanal",
 					Ingredients: []string{"Tomate", "Lechuga", "Cebolla", "Aguacate"},
 					Kcal:        100,
 					Seasons:     []string{"general"},
@@ -379,10 +379,10 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Name:        "pizza",
 					Description: "",
 					Image:       "",
-					Type:        "occasional",
+					Type:        "ocasional",
 					Ingredients: []string{"Tomate", "Queso", "Pollo"},
 					Kcal:        130,
-					Seasons:     []string{"winter", "summer"},
+					Seasons:     []string{"invierno", "verano"},
 				},
 			},
 			expectedStatusCode: http.StatusOK,
@@ -391,7 +391,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 		{
 			name: "List meals filtered by seasons (ok)",
 			filters: map[string][]string{
-				"[]season": {"winter"},
+				"[]season": {"invierno"},
 			},
 			userID: "01FN3EEB2NVFJAHAPU00000001",
 			expectedResp: &[]Meal{
@@ -400,10 +400,20 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 					Name:        "pizza",
 					Description: "",
 					Image:       "",
-					Type:        "occasional",
+					Type:        "ocasional",
 					Ingredients: []string{"Tomate", "Queso", "Pollo"},
 					Kcal:        130,
-					Seasons:     []string{"winter", "summer"},
+					Seasons:     []string{"invierno", "verano"},
+				},
+				{
+					Id:          "01FN3EEB2NVFJAHAPM00000002",
+					Name:        "ensalada",
+					Description: "",
+					Image:       "",
+					Type:        "semanal",
+					Ingredients: []string{"Tomate", "Lechuga", "Cebolla", "Aguacate"},
+					Kcal:        100,
+					Seasons:     []string{"general"},
 				},
 			},
 			expectedStatusCode: http.StatusOK,
@@ -488,19 +498,19 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 				Name:        "pizza margarita",
 				Description: "",
 				Image:       "",
-				Type:        "occasional",
+				Type:        "ocasional",
 				Ingredients: []string{"Tomate", "Queso"},
-				Seasons:     []string{"winter", "summer"},
+				Seasons:     []string{"invierno", "verano"},
 			},
 			expectedResp: &Meal{
 				Id:          "01FN3EEB2NVFJAHAPM00000001",
 				Name:        "pizza margarita",
 				Description: "",
 				Image:       "",
-				Type:        "occasional",
+				Type:        "ocasional",
 				Ingredients: []string{"Tomate", "Queso"},
-				Kcal:        322,
-				Seasons:     []string{"winter", "summer"},
+				Kcal:        0,
+				Seasons:     []string{"invierno", "verano"},
 			},
 			expectedStatusCode: http.StatusOK,
 			wantErr:            false,
@@ -539,10 +549,10 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 				Name:        "invented food",
 				Description: "",
 				Image:       "",
-				Type:        "occasional",
+				Type:        "ocasional",
 				Ingredients: []string{"Tomate", "Queso"},
 				Kcal:        100,
-				Seasons:     []string{"winter"},
+				Seasons:     []string{"invierno"},
 			},
 			expectedResp: &ErrorResponse{
 				Err: ErrorBody{
@@ -585,7 +595,11 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 		s.Run(t.name, func() {
 			userManager := NewMealManager(*s.db)
 			api := MealAPI{DB: *s.db, Manager: userManager}
-
+			if _, ok := t.reqBody.(*Meal); ok {
+				meal := t.reqBody.(*Meal)
+				meal.Id = t.mealID
+				s.httpMock.On("GetCalendar", t.userID, *meal, false).Return(nil).Once()
+			}
 			s.httpMock.On("GetUser", t.userID).Return(User{}, nil).Once()
 
 			c := getEchoContext(t.userID, t.mealID, t.reqBody)
@@ -685,7 +699,7 @@ func (s *MealAPITestSuite) TestDeleteMealHandler() {
 			api := MealAPI{DB: *s.db, Manager: userManager}
 
 			s.httpMock.On("GetUser", t.userID).Return(User{}, nil).Once()
-
+			s.httpMock.On("GetCalendar", t.userID, Meal{Id: t.mealID}, true).Return(nil).Once()
 			c := getEchoContext(t.userID, t.mealID)
 			err := api.DeleteMealHandler(c)
 

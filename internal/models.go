@@ -47,12 +47,10 @@ type MealDB struct {
 	Name        string `db:"name" json:"name" validate:"required"`
 	Description string `db:"description" json:"description,omitempty"`
 	Image       string `db:"image" json:"image,omitempty"`
-	Type        string `db:"type" json:"type" validate:"required,oneof=weekly occasional standard"`
+	Type        string `db:"type" json:"type" validate:"required,oneof=semanal ocasional normal"`
 	Ingredients string `db:"ingredients" json:"ingredients" validate:"required"`
 	Kcal        int    `db:"kcal" json:"kcal"`
 	Seasons     string `db:"seasons" json:"seasons"`
-	//Creator     int    `db:"creator" json:"creator"`
-	//Saves       int    `db:"saves" json:"saves"`
 }
 
 type Meal struct {
@@ -61,12 +59,10 @@ type Meal struct {
 	Name        string   `json:"name" validate:"required"`
 	Description string   `json:"description"`
 	Image       string   `json:"image"`
-	Type        string   `json:"type" validate:"required,oneof=weekly occasional standard"`
+	Type        string   `json:"type" validate:"required,oneof=semanal ocasional normal"`
 	Ingredients []string `json:"ingredients" validate:"required"`
 	Kcal        int      `json:"kcal"`
-	Seasons     []string `json:"seasons" validate:"required,dive,oneof=summer winter spring fall general"`
-	//Creator     int      `json:"creator"`
-	//Saves       int      `json:"saves"`
+	Seasons     []string `json:"seasons" validate:"required,dive,oneof=primavera verano otoño invierno general"`
 }
 
 type MealsFilters struct {

@@ -157,8 +157,8 @@ components:
         seasons:
           type: array
           example:
-            - winter
-            - spring
+            - invierno
+            - primavera
     MealResponse:
       title: Meal Response
       type: object
@@ -192,8 +192,8 @@ components:
         seasons:
           type: array
           example:
-            - winter
-            - spring
+            - invierno
+            - primavera
     MealsList:
       title: Meals List
       properties:
@@ -251,12 +251,12 @@ components:
               example: 80
             type:
               type: string
-              example: weekly
+              example: semanal
             seasons:
               type: array
               example:
-                - winter
-                - spring
+                - invierno
+                - primavera
         paging:
           next_cursor: ''
           previous_cursor: ''
@@ -303,7 +303,7 @@ components:
       required: false
       schema:
         type: string
-        example: weekly
+        example: semanal
     healthy:
       in: query
       name: healthy
@@ -322,10 +322,10 @@ components:
       examples:
         oneId:
           summary: Example of a single Season
-          value: [ "winter" ] # ?season[]=winter
+          value: [ "invierno" ] # ?season[]=invierno
         multipleIds:
           summary: Example of multiple Seasons
-          value: [ "winter", "spring" ] # ?season[]=winter&season[]=spring
+          value: [ "invierno", "primavera" ] # ?season[]=invierno&season[]=primavera
   responses:
     BadRequest:
       description: Payload format error

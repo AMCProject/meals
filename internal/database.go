@@ -113,6 +113,8 @@ func applyFilters(filters MealsFilters) (query string) {
 			season := "%" + s + "%"
 			query += fmt.Sprintf("AND seasons LIKE '%s'", season)
 		}
+		general := "%general%"
+		query += fmt.Sprintf("OR seasons LIKE '%s'", general)
 	}
 	return
 }
