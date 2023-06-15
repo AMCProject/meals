@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	"meals/pkg/database"
 )
@@ -85,6 +86,7 @@ func (m *MealManager) CreateMeal(userID string, mealPost Meal) (meal *Meal, err 
 	}
 
 	if err = m.validate.Struct(mealPost); err != nil {
+		fmt.Println("ERROR", err)
 		return nil, ErrWrongBody
 	}
 	var kcal int
