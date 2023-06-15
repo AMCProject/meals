@@ -3,7 +3,7 @@ package internal
 import "strings"
 
 var Vegetables = map[string]int{
-	"Aceitunas negras": 349, "Aceitunas verdes": 132, "Acelgas": 33, "Ajos": 169, "Alcachofas": 64, "Apio": 20, "Berenjena": 29, "Berros": 21, "Brócoli": 31, "Calabacín": 31, "Calabaza": 24, "Cebolla": 47, "Cebolla tierna": 39, "Champiñón y otras setas": 28, "Col": 28, "Col de Bruselas": 54, "Coliflor": 30, "Endibia": 22, "Escarola": 37, "Espárragos": 26, "Espárragos en lata": 24, "Espinaca": 32, "Espinacas congeladas": 25, "Habas tiernas": 64, "Hinojo": 16, "Lechuga": 18, "Nabos": 29, "Papas cocidas": 86, "Pepino": 12, "Perejil": 55, "Pimiento": 22, "Porotos verdes": 21, "Puerros": 42, "Rábanos": 20, "Remolacha": 40, "Repollo": 19, "Rúcula": 37, "Brotes de Soja": 50, "Tomate triturado en conserva": 39, "Tomates": 22, "Trufa": 92, "Zanahoria": 42, "Zumo de tomate": 21,
+	"Aceitunas negras": 349, "Aceitunas verdes": 132, "Acelgas": 33, "Ajos": 169, "Alcachofas": 64, "Apio": 20, "Berenjena": 29, "Berros": 21, "Brócoli": 31, "Calabacín": 31, "Calabaza": 24, "Cebolla": 47, "Cebolla tierna": 39, "Champiñón y otras setas": 28, "Col": 28, "Col de Bruselas": 54, "Coliflor": 30, "Endibia": 22, "Escarola": 37, "Espárragos": 26, "Espárragos en lata": 24, "Espinaca": 32, "Espinacas congeladas": 25, "Habas tiernas": 64, "Hinojo": 16, "Lechuga": 18, "Nabos": 29, "Pepino": 12, "Perejil": 55, "Pimiento": 22, "Porotos verdes": 21, "Puerros": 42, "Rábanos": 20, "Remolacha": 40, "Repollo": 19, "Rúcula": 37, "Brotes de Soja": 50, "Tomate triturado en conserva": 39, "Tomates": 22, "Trufa": 92, "Zanahoria": 42, "Zumo de tomate": 21,
 }
 var Fruits = map[string]int{
 	"Arándanos": 41, "Caqui": 64, "Cereza": 47, "Chirimoya": 78, "Ciruela": 44, "Ciruela seca": 290, "Coco": 646, "Dátil": 279, "Dátil seco": 306, "Frambuesa": 40, "Fresas": 36, "Granada": 65, "Grosella": 37, "Higos": 80, "Higos secos": 275, "Kiwi": 51, "Limón": 39, "Mandarina": 40, "Mango": 57, "Manzana": 52, "Melón": 31, "Mora": 37, "Naranja": 44, "Nectarina": 64, "Nísperos": 97, "Papaya": 45, "Pera": 61, "Piña": 51, "Piña en almíbar": 84, "Plátano": 90, "Pomelo": 30, "Sandía": 30, "Uva": 81, "Uva pasa": 324, "Zumo de fruta": 45, "Zumo de Naranja": 42,
@@ -18,7 +18,7 @@ var Fish = map[string]int{
 	"Almejas": 50, "Anchoas": 175, "Anguilas": 200, "Atún en lata con aceite vegetal": 280, " Atún en lata con agua": 127, "Atún fresco": 225, "Bacalao fresco": 74, "Bacalao seco": 322, "Besugo": 118, "Caballa": 153, "Calamar": 82, "Cangrejo": 85, "Caviar": 233, "Congrio": 112, "Dorada": 80, "Gallo": 73, "Gambas": 96, "Langosta": 67, "Langostino": 96, "Lenguado": 73, "Lubina": 118, "Lucio": 81, "Mejillón": 74, "Merluza": 86, "Mero": 118, "Ostras": 80, "Pejerrey": 87, "Pez espada": 109, "Pulpo": 57, "Rodaballo": 81, "Salmón": 172, "Salmón ahumado": 154, "Salmonete": 97, "Sardina en lata con aceite vegetal": 192, "Sardinas": 151, "Trucha": 94,
 }
 var Cereals = map[string]int{
-	"Arroz blanco": 354, "Arroz integral": 350, "Avena": 367, "Cebada": 373, "Centeno": 350, "Cereales con chocolate": 358, "Cereales desayuno, con miel": 386, "Copos de maíz": 350, "Harina de maíz": 349, "Harina de trigo integral": 340, "Harina de trigo refinada": 353, "Pan de centeno": 241, "Pan de trigo blanco": 255, "Pan de trigo integral": 239, "Pan de trigo molde blanco": 233, "Pan de trigo molde integral": 216, "Pasta al huevo": 368, "Pasta de sémola": 361, "Polenta": 358, "Sémola de trigo": 368, "Yuca": 338,
+	"Arroz blanco": 354, "Arroz integral": 350, "Avena": 367, "Cebada": 373, "Centeno": 350, "Cereales con chocolate": 358, "Cereales desayuno, con miel": 386, "Copos de maíz": 350, "Harina de maíz": 349, "Harina de trigo integral": 340, "Harina de trigo refinada": 353, "Pan de centeno": 241, "Pan de trigo blanco": 255, "Pan de trigo integral": 239, "Pan de trigo molde blanco": 233, "Pan de trigo molde integral": 216, "Pasta al huevo": 368, "Pasta de sémola": 361, "Patatas cocidas": 86, "Patatas fritas": 312, "Polenta": 358, "Sémola de trigo": 368, "Yuca": 338,
 }
 var Legumes = map[string]int{
 	"Garbanzos": 361, "Judías": 343, "Lentejas": 336,
@@ -30,15 +30,15 @@ var Sauce = map[string]int{
 	"Bechamel": 115, "Caldos concentrados": 259, "Ketchup": 98, "Mayonesa": 718, "Mayonesa light": 374, "Mostaza": 15, "Salsa de soja": 61, "Salsa de tomate en conserva": 86, "Sofrito": 116, "Vinagres": 8,
 }
 var Ingredients = map[string]map[string]int{
-	"Verduras":  Vegetables,
-	"Frutas":    Fruits,
-	"Lácteos":   Dairy,
-	"Carnes":    Meat,
-	"Pescados":  Fish,
-	"Cereales":  Cereals,
-	"Legumbres": Legumes,
-	"Huevos":    Eggs,
-	"Salsas":    Sauce,
+	"Verduras":          Vegetables,
+	"Frutas":            Fruits,
+	"Lácteos":           Dairy,
+	"Carnes":            Meat,
+	"Pescados":          Fish,
+	"Pastas y Cereales": Cereals,
+	"Legumbres":         Legumes,
+	"Huevos":            Eggs,
+	"Salsas":            Sauce,
 }
 
 type MealDB struct {

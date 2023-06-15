@@ -11,33 +11,10 @@ type Endpoints struct {
 }
 
 type EndpointsI interface {
-	GetUser(userId string) (user User, err error)
 	GetCalendar(userId string, meal Meal, delete bool) (err error)
 }
 
 var httpClient = &http.Client{}
-
-func (e *Endpoints) GetUser(userId string) (user User, err error) {
-	request, err := http.NewRequest(http.MethodGet, config.Config.UsersURL+"user/"+userId, nil)
-	if err != nil {
-		return
-	}
-	response, err := httpClient.Do(request)
-	if err != nil {
-		return User{}, err
-	}
-	if response.StatusCode > 299 {
-		newError := new(ErrorResponse)
-		err = json.NewDecoder(response.Body).Decode(&newError)
-		return User{}, newError
-	}
-	err = json.NewDecoder(response.Body).Decode(&user)
-	if err != nil {
-		return User{}, err
-	}
-
-	return
-}
 
 func (e *Endpoints) GetCalendar(userId string, meal Meal, delete bool) (err error) {
 	var calendar []Calendar

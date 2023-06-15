@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/go-playground/validator/v10"
 	"meals/pkg/database"
 )
@@ -32,25 +31,16 @@ func NewMealManager(db database.Database) *MealManager {
 
 // GetMeal function to get a specific meal from a user
 func (m *MealManager) GetMeal(userID, mealID string) (meal *Meal, err error) {
-	if _, err = Microservices.GetUser(userID); err != nil {
-		return nil, err
-	}
 	return m.db.GetMeal(userID, mealID)
 }
 
 // ListMeals returns all the meals created by a user
 func (m *MealManager) ListMeals(userID string, filters *MealsFilters) (meals []*Meal, err error) {
-	if _, err = Microservices.GetUser(userID); err != nil {
-		return nil, err
-	}
 	return m.db.ListMeals(userID, *filters)
 }
 
 // UpdateMeal function to update the meal selected (if any parameter is missing we get the oldest ones
 func (m *MealManager) UpdateMeal(userID string, mealID string, mealPut Meal) (meal *Meal, err error) {
-	if _, err = Microservices.GetUser(userID); err != nil {
-		return nil, err
-	}
 
 	if err = m.validate.Struct(mealPut); err != nil {
 		return nil, err
@@ -81,12 +71,8 @@ func (m *MealManager) UpdateMeal(userID string, mealID string, mealPut Meal) (me
 
 // CreateMeal function to create a new meal for the user selected
 func (m *MealManager) CreateMeal(userID string, mealPost Meal) (meal *Meal, err error) {
-	if _, err = Microservices.GetUser(userID); err != nil {
-		return nil, err
-	}
 
 	if err = m.validate.Struct(mealPost); err != nil {
-		fmt.Println("ERROR", err)
 		return nil, ErrWrongBody
 	}
 	var kcal int
@@ -100,9 +86,6 @@ func (m *MealManager) CreateMeal(userID string, mealPost Meal) (meal *Meal, err 
 
 // DeleteMeal function to delete on meal from user
 func (m *MealManager) DeleteMeal(userID, mealID string) (err error) {
-	if _, err = Microservices.GetUser(userID); err != nil {
-		return err
-	}
 	if _, err = m.db.GetMeal(userID, mealID); err != nil {
 		return err
 	}

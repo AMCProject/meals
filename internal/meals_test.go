@@ -140,8 +140,6 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 			userManager := NewMealManager(*s.db)
 			api := MealAPI{DB: *s.db, Manager: userManager}
 
-			s.httpMock.On("GetUser", t.userId).Return(User{}, nil).Once()
-
 			c := getEchoContext(t.userId, t.reqBody)
 			err := api.PostMealHandler(c)
 
@@ -248,7 +246,6 @@ func (s *MealAPITestSuite) TestGetMealHandler() {
 		s.Run(t.name, func() {
 			userManager := NewMealManager(*s.db)
 			api := MealAPI{DB: *s.db, Manager: userManager}
-			s.httpMock.On("GetUser", t.userID).Return(User{}, nil).Once()
 
 			c := getEchoContext(t.userID, t.mealID)
 			err := api.GetMealHandler(c)
@@ -451,8 +448,6 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 			userManager := NewMealManager(*s.db)
 			api := MealAPI{DB: *s.db, Manager: userManager}
 
-			s.httpMock.On("GetUser", t.userID).Return(User{}, nil).Once()
-
 			c := getEchoContext(t.userID, t.filters)
 			err := api.ListMealsHandler(c)
 
@@ -600,7 +595,6 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 				meal.Id = t.mealID
 				s.httpMock.On("GetCalendar", t.userID, *meal, false).Return(nil).Once()
 			}
-			s.httpMock.On("GetUser", t.userID).Return(User{}, nil).Once()
 
 			c := getEchoContext(t.userID, t.mealID, t.reqBody)
 			err := api.PutMealHandler(c)
@@ -698,7 +692,6 @@ func (s *MealAPITestSuite) TestDeleteMealHandler() {
 			userManager := NewMealManager(*s.db)
 			api := MealAPI{DB: *s.db, Manager: userManager}
 
-			s.httpMock.On("GetUser", t.userID).Return(User{}, nil).Once()
 			s.httpMock.On("GetCalendar", t.userID, Meal{Id: t.mealID}, true).Return(nil).Once()
 			c := getEchoContext(t.userID, t.mealID)
 			err := api.DeleteMealHandler(c)
