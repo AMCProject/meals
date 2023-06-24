@@ -110,7 +110,7 @@ type Hits struct {
 
 type Recipe struct {
 	Name        string  `json:"label"`
-	Imagen      string  `json:"imagen"`
+	Imagen      string  `json:"image"`
 	Description string  `json:"url"`
 	Kcal        float64 `json:"calories"`
 }
