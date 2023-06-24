@@ -1,4 +1,4 @@
-package internal
+package handlers
 
 import (
 	"bytes"
@@ -6,6 +6,11 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/oklog/ulid/v2"
 	"github.com/stretchr/testify/suite"
+	"meals/internal"
+	"meals/internal/managers"
+	"meals/internal/models"
+	"meals/internal/repositories"
+	"meals/internal/utils"
 	"meals/pkg/database"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +23,7 @@ var databaseTest = "/amc_test.db"
 type MealAPITestSuite struct {
 	suite.Suite
 	db       *database.Database
-	httpMock *EndpointsMock
+	httpMock *utils.EndpointsMock
 }
 
 func TestMealAPITestSuite(t *testing.T) {
@@ -26,12 +31,12 @@ func TestMealAPITestSuite(t *testing.T) {
 }
 
 func (s *MealAPITestSuite) SetupTest() {
-	s.httpMock = &EndpointsMock{}
-	Microservices = s.httpMock
+	s.httpMock = &utils.EndpointsMock{}
+	managers.Microservices = s.httpMock
 	_ = database.RemoveDB(databaseTest)
 	s.db = database.InitDB(databaseTest)
-	s.db.Conn.Exec(createMeal, "01FN3EEB2NVFJAHAPM00000001", "01FN3EEB2NVFJAHAPU00000001", "pizza", "", "", "ocasional", "Tomate,Queso,Pollo", 130, "invierno,verano")
-	s.db.Conn.Exec(createMeal, "01FN3EEB2NVFJAHAPM00000002", "01FN3EEB2NVFJAHAPU00000001", "ensalada", "", "", "semanal", "Tomate,Lechuga,Cebolla,Aguacate", 100, "general")
+	s.db.Conn.Exec(repositories.CreateMeal, "01FN3EEB2NVFJAHAPM00000001", "01FN3EEB2NVFJAHAPU00000001", "pizza", "", "", "ocasional", "Tomate,Queso,Pollo", 130, "invierno,verano")
+	s.db.Conn.Exec(repositories.CreateMeal, "01FN3EEB2NVFJAHAPM00000002", "01FN3EEB2NVFJAHAPU00000001", "ensalada", "", "", "semanal", "Tomate,Lechuga,Cebolla,Aguacate", 100, "general")
 }
 
 func (s *MealAPITestSuite) TearDownTest() {
@@ -52,7 +57,7 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 		{
 			name:   "[001] Create new meal (ok)",
 			userId: "01FN3EEB2NVFJAHAPU00000001",
-			reqBody: &Meal{
+			reqBody: &models.Meal{
 				Name:        "Huevos fritos con patatas",
 				Description: "",
 				Image:       "",
@@ -61,7 +66,7 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 				Seasons:     []string{"general"},
 			},
 			expectedULID: ulid.MustParse("01FN3EEB2NVFJAHAPM00000003"),
-			expectedResp: &Meal{
+			expectedResp: &models.Meal{
 				Id:          "01FN3EEB2NVFJAHAPM00000003",
 				Name:        "Huevos fritos con patatas",
 				Description: "",
@@ -77,7 +82,7 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 		{
 			name:   "[002] Wrong meal struct, name is missing (400)",
 			userId: "01FN3EEB2NVFJAHAPU00000001",
-			reqBody: &Meal{
+			reqBody: &models.Meal{
 				UserId:      "01FN3EEB2NVFJAHAPU00000004",
 				Description: "",
 				Image:       "",
@@ -86,10 +91,10 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 				Kcal:        320,
 				Seasons:     []string{"general"},
 			},
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusBadRequest,
-					Message: ErrWrongBody.Error(),
+					Message: internal.ErrWrongBody.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
@@ -99,10 +104,10 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 			name:    "[003] Wrong struct sent (400)",
 			userId:  "01FN3EEB2NVFJAHAPU00000001",
 			reqBody: "invalid",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusBadRequest,
-					Message: ErrWrongBody.Error(),
+					Message: internal.ErrWrongBody.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
@@ -110,10 +115,10 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 		},
 		{
 			name: "[004] User id not present (400)",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusBadRequest,
-					Message: ErrUserIDNotPresent.Error(),
+					Message: internal.ErrUserIDNotPresent.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
@@ -125,11 +130,11 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 		body, err := jsoniter.Marshal(request)
 		s.NoError(err)
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodPost, RouteMeal, bytes.NewBuffer(body))
+		req := httptest.NewRequest(http.MethodPost, internal.RouteMeal, bytes.NewBuffer(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetParamNames(ParamUserID)
+		c.SetParamNames(internal.ParamUserID)
 		c.SetParamValues(userId)
 		return c
 	}
@@ -137,7 +142,7 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 	for _, t := range tests {
 		s.Run(t.name, func() {
 
-			userManager := NewMealManager(*s.db)
+			userManager := managers.NewMealManager(*s.db)
 			api := MealAPI{DB: *s.db, Manager: userManager}
 
 			c := getEchoContext(t.userId, t.reqBody)
@@ -149,7 +154,7 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 				s.True(ok)
 				body := resp.Body.Bytes()
 
-				errorReturned := new(ErrorResponse)
+				errorReturned := new(internal.ErrorResponse)
 				s.NoError(jsoniter.Unmarshal(body, errorReturned))
 				s.Equal(errorReturned, t.expectedResp)
 			} else {
@@ -157,7 +162,7 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 				s.True(ok)
 				body := resp.Body.Bytes()
 
-				actualMeal := new(Meal)
+				actualMeal := new(models.Meal)
 				s.NoError(jsoniter.Unmarshal(body, actualMeal))
 				actualMeal.Id = t.expectedULID.String()
 				s.Equal(actualMeal, t.expectedResp)
@@ -181,7 +186,7 @@ func (s *MealAPITestSuite) TestGetMealHandler() {
 			name:   "[001] Get meal (ok)",
 			userID: "01FN3EEB2NVFJAHAPU00000001",
 			mealID: "01FN3EEB2NVFJAHAPM00000001",
-			expectedResp: &Meal{
+			expectedResp: &models.Meal{
 				Id:          "01FN3EEB2NVFJAHAPM00000001",
 				Name:        "pizza",
 				Description: "",
@@ -197,10 +202,10 @@ func (s *MealAPITestSuite) TestGetMealHandler() {
 		{
 			name:   "[002] Get meal, userId not indicated (400)",
 			mealID: "01FN3EEB2NVFJAHAPM00000001",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusBadRequest,
-					Message: ErrUserIDNotPresent.Error(),
+					Message: internal.ErrUserIDNotPresent.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
@@ -209,10 +214,10 @@ func (s *MealAPITestSuite) TestGetMealHandler() {
 		{
 			name:   "[003] Get meal, mealId not indicated (400)",
 			userID: "01FN3EEB2NVFJAHAPU00000001",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusBadRequest,
-					Message: ErrMealIDNotPresent.Error(),
+					Message: internal.ErrMealIDNotPresent.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
@@ -222,10 +227,10 @@ func (s *MealAPITestSuite) TestGetMealHandler() {
 			name:   "[005] Meal does not exist (404)",
 			userID: "01FN3EEB2NVFJAHAPU00000001",
 			mealID: "01FN3EEB2NVFJAHAPM00000099",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusNotFound,
-					Message: ErrMealNotFound.Error(),
+					Message: internal.ErrMealNotFound.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusNotFound,
@@ -234,17 +239,17 @@ func (s *MealAPITestSuite) TestGetMealHandler() {
 	}
 	getEchoContext := func(userId, mealId string) echo.Context {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, RouteMealID, nil)
+		req := httptest.NewRequest(http.MethodGet, internal.RouteMealID, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetParamNames(ParamUserID, ParamMealID)
+		c.SetParamNames(internal.ParamUserID, internal.ParamMealID)
 		c.SetParamValues(userId, mealId)
 		return c
 	}
 	for _, t := range tests {
 		s.Run(t.name, func() {
-			userManager := NewMealManager(*s.db)
+			userManager := managers.NewMealManager(*s.db)
 			api := MealAPI{DB: *s.db, Manager: userManager}
 
 			c := getEchoContext(t.userID, t.mealID)
@@ -256,7 +261,7 @@ func (s *MealAPITestSuite) TestGetMealHandler() {
 				s.True(ok)
 				body := resp.Body.Bytes()
 
-				errorReturned := new(ErrorResponse)
+				errorReturned := new(internal.ErrorResponse)
 				s.NoError(jsoniter.Unmarshal(body, errorReturned))
 				s.Equal(errorReturned, t.expectedResp)
 			} else {
@@ -264,7 +269,7 @@ func (s *MealAPITestSuite) TestGetMealHandler() {
 				s.True(ok)
 				body := resp.Body.Bytes()
 
-				actualMeal := new(Meal)
+				actualMeal := new(models.Meal)
 				s.NoError(jsoniter.Unmarshal(body, actualMeal))
 				s.Equal(actualMeal, t.expectedResp)
 			}
@@ -287,7 +292,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 		{
 			name:   "List meals (ok)",
 			userID: "01FN3EEB2NVFJAHAPU00000001",
-			expectedResp: &[]Meal{
+			expectedResp: &[]models.Meal{
 				{
 					Id:          "01FN3EEB2NVFJAHAPM00000001",
 					Name:        "pizza",
@@ -318,7 +323,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 				"name": {"pizza"},
 			},
 			userID: "01FN3EEB2NVFJAHAPU00000001",
-			expectedResp: &[]Meal{
+			expectedResp: &[]models.Meal{
 				{
 					Id:          "01FN3EEB2NVFJAHAPM00000001",
 					Name:        "pizza",
@@ -339,7 +344,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 				"type": {"semanal"},
 			},
 			userID: "01FN3EEB2NVFJAHAPU00000001",
-			expectedResp: &[]Meal{
+			expectedResp: &[]models.Meal{
 				{
 					Id:          "01FN3EEB2NVFJAHAPM00000002",
 					Name:        "ensalada",
@@ -360,7 +365,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 				"healthy": {"true"},
 			},
 			userID: "01FN3EEB2NVFJAHAPU00000001",
-			expectedResp: &[]Meal{
+			expectedResp: &[]models.Meal{
 				{
 					Id:          "01FN3EEB2NVFJAHAPM00000002",
 					Name:        "ensalada",
@@ -391,7 +396,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 				"[]season": {"invierno"},
 			},
 			userID: "01FN3EEB2NVFJAHAPU00000001",
-			expectedResp: &[]Meal{
+			expectedResp: &[]models.Meal{
 				{
 					Id:          "01FN3EEB2NVFJAHAPM00000001",
 					Name:        "pizza",
@@ -418,10 +423,10 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 		},
 		{
 			name: "List meals, userId not indicated (400)",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusBadRequest,
-					Message: ErrUserIDNotPresent.Error(),
+					Message: internal.ErrUserIDNotPresent.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
@@ -434,18 +439,18 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 		if len(filters) > 0 {
 			queryString = "/?" + filters.Encode()
 		}
-		req := httptest.NewRequest(http.MethodGet, RouteMeal+queryString, nil)
+		req := httptest.NewRequest(http.MethodGet, internal.RouteMeal+queryString, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetParamNames(ParamUserID)
+		c.SetParamNames(internal.ParamUserID)
 		c.SetParamValues(userId)
 
 		return c
 	}
 	for _, t := range tests {
 		s.Run(t.name, func() {
-			userManager := NewMealManager(*s.db)
+			userManager := managers.NewMealManager(*s.db)
 			api := MealAPI{DB: *s.db, Manager: userManager}
 
 			c := getEchoContext(t.userID, t.filters)
@@ -457,7 +462,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 				s.True(ok)
 				body := resp.Body.Bytes()
 
-				errorReturned := new(ErrorResponse)
+				errorReturned := new(internal.ErrorResponse)
 				s.NoError(jsoniter.Unmarshal(body, errorReturned))
 				s.Equal(errorReturned, t.expectedResp)
 			} else {
@@ -465,7 +470,7 @@ func (s *MealAPITestSuite) TestListMealsHandler() {
 				s.True(ok)
 				body := resp.Body.Bytes()
 
-				actualMeals := new([]Meal)
+				actualMeals := new([]models.Meal)
 				s.NoError(jsoniter.Unmarshal(body, actualMeals))
 				s.Equal(actualMeals, t.expectedResp)
 			}
@@ -489,7 +494,7 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 			name:   "Update meal (ok)",
 			userID: "01FN3EEB2NVFJAHAPU00000001",
 			mealID: "01FN3EEB2NVFJAHAPM00000001",
-			reqBody: &Meal{
+			reqBody: &models.Meal{
 				Name:        "pizza margarita",
 				Description: "",
 				Image:       "",
@@ -497,7 +502,7 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 				Ingredients: []string{"Tomate", "Queso"},
 				Seasons:     []string{"invierno", "verano"},
 			},
-			expectedResp: &Meal{
+			expectedResp: &models.Meal{
 				Id:          "01FN3EEB2NVFJAHAPM00000001",
 				Name:        "pizza margarita",
 				Description: "",
@@ -513,10 +518,10 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 		{
 			name:   "Update meal, userId not indicated (400)",
 			mealID: "01FN3EEB2NVFJAHAPM00000001",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusBadRequest,
-					Message: ErrUserIDNotPresent.Error(),
+					Message: internal.ErrUserIDNotPresent.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
@@ -525,10 +530,10 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 		{
 			name:   "Update meal, mealId not indicated (400)",
 			userID: "01FN3EEB2NVFJAHAPU00000001",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusBadRequest,
-					Message: ErrMealIDNotPresent.Error(),
+					Message: internal.ErrMealIDNotPresent.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
@@ -538,7 +543,7 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 			name:   "Update meal that does not exist (404)",
 			userID: "01FN3EEB2NVFJAHAPU00000001",
 			mealID: "01FN3EEB2NVFJAHAPM00000099",
-			reqBody: &Meal{
+			reqBody: &models.Meal{
 				Id:          "01FN3EEB2NVFJAHAPM00000099",
 				UserId:      "01FN3EEB2NVFJAHAPU00000001",
 				Name:        "invented food",
@@ -549,10 +554,10 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 				Kcal:        100,
 				Seasons:     []string{"invierno"},
 			},
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusNotFound,
-					Message: ErrMealNotFound.Error(),
+					Message: internal.ErrMealNotFound.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusNotFound,
@@ -563,10 +568,10 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 			userID:  "01FN3EEB2NVFJAHAPU00000001",
 			mealID:  "01FN3EEB2NVFJAHAPM00000001",
 			reqBody: "invalid",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusBadRequest,
-					Message: ErrWrongBody.Error(),
+					Message: internal.ErrWrongBody.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
@@ -578,20 +583,20 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 		body, err := jsoniter.Marshal(request)
 		s.NoError(err)
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodPut, RouteMealID, bytes.NewBuffer(body))
+		req := httptest.NewRequest(http.MethodPut, internal.RouteMealID, bytes.NewBuffer(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetParamNames(ParamUserID, ParamMealID)
+		c.SetParamNames(internal.ParamUserID, internal.ParamMealID)
 		c.SetParamValues(userId, mealId)
 		return c
 	}
 	for _, t := range tests {
 		s.Run(t.name, func() {
-			userManager := NewMealManager(*s.db)
+			userManager := managers.NewMealManager(*s.db)
 			api := MealAPI{DB: *s.db, Manager: userManager}
-			if _, ok := t.reqBody.(*Meal); ok {
-				meal := t.reqBody.(*Meal)
+			if _, ok := t.reqBody.(*models.Meal); ok {
+				meal := t.reqBody.(*models.Meal)
 				meal.Id = t.mealID
 				s.httpMock.On("GetCalendar", t.userID, *meal, false).Return(nil).Once()
 			}
@@ -605,7 +610,7 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 				s.True(ok)
 				body := resp.Body.Bytes()
 
-				errorReturned := new(ErrorResponse)
+				errorReturned := new(internal.ErrorResponse)
 				s.NoError(jsoniter.Unmarshal(body, errorReturned))
 				s.Equal(errorReturned, t.expectedResp)
 			} else {
@@ -613,7 +618,7 @@ func (s *MealAPITestSuite) TestPutMealHandler() {
 				s.True(ok)
 				body := resp.Body.Bytes()
 
-				actualMeal := new(Meal)
+				actualMeal := new(models.Meal)
 				s.NoError(jsoniter.Unmarshal(body, actualMeal))
 				s.Equal(actualMeal, t.expectedResp)
 			}
@@ -642,10 +647,10 @@ func (s *MealAPITestSuite) TestDeleteMealHandler() {
 		{
 			name:   "[002] Delete meal, userId not indicated (400)",
 			mealID: "01FN3EEB2NVFJAHAPM00000001",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusBadRequest,
-					Message: ErrUserIDNotPresent.Error(),
+					Message: internal.ErrUserIDNotPresent.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
@@ -654,10 +659,10 @@ func (s *MealAPITestSuite) TestDeleteMealHandler() {
 		{
 			name:   "[003] Delete meal, mealId not indicated (400)",
 			userID: "01FN3EEB2NVFJAHAPU00000001",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusBadRequest,
-					Message: ErrMealIDNotPresent.Error(),
+					Message: internal.ErrMealIDNotPresent.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusBadRequest,
@@ -667,10 +672,10 @@ func (s *MealAPITestSuite) TestDeleteMealHandler() {
 			name:   "[005] Meal does not exist (404)",
 			userID: "01FN3EEB2NVFJAHAPU00000001",
 			mealID: "01FN3EEB2NVFJAHAPM00000099",
-			expectedResp: &ErrorResponse{
-				Err: ErrorBody{
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
 					Status:  http.StatusNotFound,
-					Message: ErrMealNotFound.Error(),
+					Message: internal.ErrMealNotFound.Error(),
 				},
 			},
 			expectedStatusCode: http.StatusNotFound,
@@ -679,20 +684,20 @@ func (s *MealAPITestSuite) TestDeleteMealHandler() {
 	}
 	getEchoContext := func(userId, mealId string) echo.Context {
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodDelete, RouteMealID, nil)
+		req := httptest.NewRequest(http.MethodDelete, internal.RouteMealID, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetParamNames(ParamUserID, ParamMealID)
+		c.SetParamNames(internal.ParamUserID, internal.ParamMealID)
 		c.SetParamValues(userId, mealId)
 		return c
 	}
 	for _, t := range tests {
 		s.Run(t.name, func() {
-			userManager := NewMealManager(*s.db)
+			userManager := managers.NewMealManager(*s.db)
 			api := MealAPI{DB: *s.db, Manager: userManager}
 
-			s.httpMock.On("GetCalendar", t.userID, Meal{Id: t.mealID}, true).Return(nil).Once()
+			s.httpMock.On("GetCalendar", t.userID, models.Meal{Id: t.mealID}, true).Return(nil).Once()
 			c := getEchoContext(t.userID, t.mealID)
 			err := api.DeleteMealHandler(c)
 
@@ -702,7 +707,7 @@ func (s *MealAPITestSuite) TestDeleteMealHandler() {
 				s.True(ok)
 				body := resp.Body.Bytes()
 
-				errorReturned := new(ErrorResponse)
+				errorReturned := new(internal.ErrorResponse)
 				s.NoError(jsoniter.Unmarshal(body, errorReturned))
 				s.Equal(errorReturned, t.expectedResp)
 			}

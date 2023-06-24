@@ -7,6 +7,8 @@ import (
 	"github.com/labstack/gommon/log"
 	"meals/internal"
 	"meals/internal/config"
+	"meals/internal/handlers"
+	"meals/internal/managers"
 	"meals/pkg/database"
 	"net/http"
 )
@@ -50,14 +52,17 @@ func setUpServer(db *database.Database) *echo.Echo {
 
 func addRoutes(e *echo.Echo, db database.Database) {
 
-	mealManager := internal.NewMealManager(db)
+	mealManager := managers.NewMealManager(db)
+	externalManager := managers.NewExternalMealsManager()
 
-	mealAPI := internal.MealAPI{DB: db, Manager: mealManager}
+	mealAPI := handlers.MealAPI{DB: db, Manager: mealManager, ExternalManager: externalManager}
 	e.POST(internal.RouteMeal, mealAPI.PostMealHandler)
 	e.GET(internal.RouteMeal, mealAPI.ListMealsHandler)
 	e.GET(internal.RouteMealID, mealAPI.GetMealHandler)
 	e.PUT(internal.RouteMealID, mealAPI.PutMealHandler)
 	e.DELETE(internal.RouteMealID, mealAPI.DeleteMealHandler)
+
+	e.GET(internal.RouteExternalMeals, mealAPI.GetExternalFoodsHandler)
 
 	e.GET(internal.RouteIngredients, mealAPI.GetIngredients)
 }

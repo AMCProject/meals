@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	RouteMeal       = "/user/:user_id/meal"
-	RouteMealID     = "/user/:user_id/meal/:id"
-	RouteMealOthers = "/user/:user_id/others"
+	RouteMeal          = "/user/:user_id/meal"
+	RouteMealID        = "/user/:user_id/meal/:id"
+	RouteExternalMeals = "/meals"
 
 	RouteIngredients = "/ingredients"
 
@@ -50,6 +50,7 @@ var errorsMap = map[string]ErrorBody{
 	ErrMealIDNotPresent.Error():   {Status: http.StatusBadRequest, Message: ErrMealIDNotPresent.Error()},
 	ErrMealTypeNotPresent.Error(): {Status: http.StatusBadRequest, Message: ErrMealTypeNotPresent.Error()},
 	ErrSomethingWentWrong.Error(): {Status: http.StatusInternalServerError, Message: ErrSomethingWentWrong.Error()},
+	ErrorWithExternalAPI.Error():  {Status: http.StatusInternalServerError, Message: ErrorWithExternalAPI.Error()},
 	ErrWrongBody.Error():          {Status: http.StatusBadRequest, Message: ErrWrongBody.Error()},
 	ErrMealNotFound.Error():       {Status: http.StatusNotFound, Message: ErrMealNotFound.Error()},
 	ErrMealsNotFound.Error():      {Status: http.StatusNotFound, Message: ErrMealsNotFound.Error()},
@@ -64,4 +65,5 @@ var (
 	ErrMealNotFound       = errors.New("meal not found")
 	ErrUserNotFound       = errors.New("user not found")
 	ErrMealsNotFound      = errors.New("meals not found")
+	ErrorWithExternalAPI  = errors.New("error inesperado con la API externa")
 )

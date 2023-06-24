@@ -1,4 +1,4 @@
-package internal
+package models
 
 import "strings"
 
@@ -60,7 +60,7 @@ type Meal struct {
 	Description string   `json:"description"`
 	Image       string   `json:"image"`
 	Type        string   `json:"type" validate:"required,oneof=semanal ocasional normal"`
-	Ingredients []string `json:"ingredients" validate:"required"`
+	Ingredients []string `json:"ingredients"`
 	Kcal        int      `json:"kcal"`
 	Seasons     []string `json:"seasons" validate:"required,dive,oneof=primavera verano otoño invierno general"`
 }
@@ -100,23 +100,32 @@ func MealFromAPI(meal *Meal) *MealDB {
 	}
 }
 
-//definitions for endpoint calls//
-
-type User struct {
-	Id       string  `db:"id" json:"id,omitempty"`
-	Name     *string `db:"name" json:"name,omitempty"`
-	Mail     string  `db:"mail" json:"mail" validate:"required,excludes= "`
-	Password string  `db:"password" json:"password" validate:"required,excludes= "`
+type ExternalMeals struct {
+	Hits []Hits `json:"hits"`
 }
 
-type Calendar struct {
-	UserId string `db:"user_id" json:"user_id"`
-	MealId string `db:"meal_id" json:"meal_id"`
-	Name   string `json:"name" json:"name"`
-	Date   string `db:"date" json:"date"`
+type Hits struct {
+	Recipe Recipe `json:"recipe"`
 }
 
-type UpdateWeekCalendar struct {
-	From string `json:"from"`
-	To   string `json:"to"`
+type Recipe struct {
+	Name        string  `json:"label"`
+	Imagen      string  `json:"imagen"`
+	Description string  `json:"url"`
+	Kcal        float64 `json:"calories"`
+}
+
+type ExternalMealFilter struct {
+	Q string `query:"q"`
+}
+
+func FromExternalToInternal(meal Recipe) Meal {
+	return Meal{
+		Name:        meal.Name,
+		Image:       meal.Imagen,
+		Description: meal.Description,
+		Kcal:        int(meal.Kcal / 10),
+		Seasons:     []string{"general"},
+		Type:        "normal",
+	}
 }
