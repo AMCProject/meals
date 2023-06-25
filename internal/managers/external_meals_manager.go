@@ -2,6 +2,7 @@ package managers
 
 import (
 	"encoding/json"
+	"math/rand"
 	"meals/internal/models"
 	"net/http"
 )
@@ -25,9 +26,10 @@ func NewExternalMealsManager() *ExternalMealsManager {
 	return &ExternalMealsManager{}
 }
 func (em *ExternalMealsManager) ListMeals(query string) ([]models.Meal, error) {
+	queries := []string{"pollo", "carne", "pasta", "arroz", "tortilla"}
 	url := ROUTE
 	if query == "" {
-		query = "pollo"
+		query = queries[rand.Intn(len(queries))]
 	}
 	url += "&q=" + query + "&app_id=" + APP_ID + "&app_key=" + APP_KEY
 	request, err := http.NewRequest(http.MethodGet, url, nil)

@@ -107,6 +107,7 @@ func (m *MealManager) DeleteMeal(userID, mealID string) (err error) {
 	if err = Microservices.GetCalendar(userID, models.Meal{Id: mealID}, true); err != nil {
 		return err
 	}
+
 	return
 }
 

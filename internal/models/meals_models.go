@@ -59,7 +59,7 @@ type Meal struct {
 	Name        string   `json:"name" validate:"required"`
 	Description string   `json:"description"`
 	Image       string   `json:"image"`
-	Type        string   `json:"type" validate:"required,dive,oneof=semanal ocasional normal"`
+	Type        string   `json:"type" validate:"required,oneof=semanal ocasional normal"`
 	Ingredients []string `json:"ingredients"`
 	Kcal        int      `json:"kcal"`
 	Seasons     []string `json:"seasons" validate:"required,dive,oneof=primavera verano otoño invierno general"`

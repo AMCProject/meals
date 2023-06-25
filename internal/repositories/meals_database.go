@@ -72,7 +72,7 @@ func (r *SQLiteMealRepository) ListMeals(userId string, filters models.MealsFilt
 		return nil, internal.ErrSomethingWentWrong
 	}
 	if len(mealsDB) == 0 {
-		return nil, internal.ErrMealNotFound
+		return nil, internal.ErrMealsNotFound
 	}
 	for _, m := range mealsDB {
 		meals = append(meals, models.MealToAPI(&m))
