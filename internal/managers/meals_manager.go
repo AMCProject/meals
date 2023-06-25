@@ -61,6 +61,8 @@ func (m *MealManager) UpdateMeal(userID string, mealID string, mealPut models.Me
 			kcal += m.allIngredients[ing]
 		}
 		mealPut.Kcal = kcal / len(mealPut.Ingredients)
+	} else {
+		mealPut.Kcal = mealGet.Kcal
 	}
 
 	meal, err = m.db.UpdateMeal(userID, mealID, mealPut)
