@@ -55,15 +55,17 @@ var errorsMap = map[string]ErrorBody{
 	ErrMealNotFound.Error():       {Status: http.StatusNotFound, Message: ErrMealNotFound.Error()},
 	ErrMealsNotFound.Error():      {Status: http.StatusNotFound, Message: ErrMealsNotFound.Error()},
 	ErrUserNotFound.Error():       {Status: http.StatusNotFound, Message: ErrUserNotFound.Error()},
+	ErrMealAlreadyExist.Error():   {Status: http.StatusConflict, Message: ErrMealAlreadyExist.Error()},
 }
 var (
-	ErrUserIDNotPresent   = errors.New("error with userID given")
-	ErrMealIDNotPresent   = errors.New("error with mealID given")
-	ErrMealTypeNotPresent = errors.New("error with mealType given")
-	ErrSomethingWentWrong = errors.New("something went wrong")
-	ErrWrongBody          = errors.New("malformed body")
-	ErrMealNotFound       = errors.New("meal not found")
-	ErrUserNotFound       = errors.New("user not found")
-	ErrMealsNotFound      = errors.New("meals not found")
+	ErrUserIDNotPresent   = errors.New("error con el ID de usuario indicado")
+	ErrMealIDNotPresent   = errors.New("error con el ID de comida indicado")
+	ErrMealTypeNotPresent = errors.New("error con el tipo de comida indicado")
+	ErrSomethingWentWrong = errors.New("error inesperado")
+	ErrWrongBody          = errors.New("el cuerpo enviado es erróneo")
+	ErrMealNotFound       = errors.New("comida no encontrada")
+	ErrUserNotFound       = errors.New("usuario no encontrado")
+	ErrMealsNotFound      = errors.New("comidas no encontradas")
 	ErrorWithExternalAPI  = errors.New("error inesperado con la API externa")
+	ErrMealAlreadyExist   = errors.New("ya existe una comida con este nombre")
 )

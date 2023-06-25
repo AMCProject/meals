@@ -82,6 +82,10 @@ func (m *MealManager) CreateMeal(userID string, mealPost models.Meal) (meal *mod
 	if err = m.validate.Struct(mealPost); err != nil {
 		return nil, internal.ErrWrongBody
 	}
+	_, err = m.db.GetMealByName(userID, mealPost.Name)
+	if err != nil {
+		return nil, err
+	}
 	var kcal int
 	if mealPost.Kcal == 0 {
 		for _, ing := range mealPost.Ingredients {

@@ -109,10 +109,11 @@ type Hits struct {
 }
 
 type Recipe struct {
-	Name        string  `json:"label"`
-	Imagen      string  `json:"image"`
-	Description string  `json:"url"`
-	Kcal        float64 `json:"calories"`
+	Name        string   `json:"label"`
+	Imagen      string   `json:"image"`
+	Description string   `json:"url"`
+	Kcal        float64  `json:"calories"`
+	Ingredients []string `json:"ingredientLines"`
 }
 
 type ExternalMealFilter struct {
@@ -127,5 +128,6 @@ func FromExternalToInternal(meal Recipe) Meal {
 		Kcal:        int(meal.Kcal / 10),
 		Seasons:     []string{"general"},
 		Type:        "normal",
+		Ingredients: meal.Ingredients,
 	}
 }

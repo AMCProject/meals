@@ -62,7 +62,7 @@ func addRoutes(e *echo.Echo, db database.Database) {
 	e.PUT(internal.RouteMealID, mealAPI.PutMealHandler)
 	e.DELETE(internal.RouteMealID, mealAPI.DeleteMealHandler)
 
-	e.GET(internal.RouteExternalMeals, mealAPI.GetExternalFoodsHandler)
+	e.GET(internal.RouteExternalMeals, mealAPI.GetAPIMealsHandler)
 
 	e.GET(internal.RouteIngredients, mealAPI.GetIngredients)
 }

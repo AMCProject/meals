@@ -12,11 +12,12 @@ import (
 )
 
 const (
-	getMeal    = "SELECT * FROM meals WHERE user_id = ? AND id = ?"
-	listMeals  = "SELECT * FROM meals WHERE user_id = ? "
-	updateMeal = "UPDATE meals SET name = ?, description = ?, image = ?, type = ?, ingredients = ?, kcal = ?, seasons = ? WHERE user_id = ? AND id = ?"
-	CreateMeal = "INSERT INTO meals(id,user_id,name,description,image,type,ingredients,kcal,seasons) VALUES (?,?,?,?,?,?,?,?,?)"
-	deleteMeal = "DELETE FROM meals WHERE user_id = ? AND id = ?"
+	getMeal       = "SELECT * FROM meals WHERE user_id = ? AND id = ?"
+	getMealByName = "SELECT * FROM meals WHERE user_id = ? AND lower(name) = lower(?)"
+	listMeals     = "SELECT * FROM meals WHERE user_id = ? "
+	updateMeal    = "UPDATE meals SET name = ?, description = ?, image = ?, type = ?, ingredients = ?, kcal = ?, seasons = ? WHERE user_id = ? AND id = ?"
+	CreateMeal    = "INSERT INTO meals(id,user_id,name,description,image,type,ingredients,kcal,seasons) VALUES (?,?,?,?,?,?,?,?,?)"
+	deleteMeal    = "DELETE FROM meals WHERE user_id = ? AND id = ?"
 )
 
 type MealRepository interface {
@@ -51,6 +52,18 @@ func (r *SQLiteMealRepository) GetMeal(userId, mealId string) (*models.Meal, err
 
 }
 
+func (r *SQLiteMealRepository) GetMealByName(userId, mealName string) (*models.Meal, error) {
+	var mealsAux []models.MealDB
+	err := r.db.Conn.Select(&mealsAux, getMealByName, userId, mealName)
+	if err != nil {
+		log.Error(err)
+		return nil, internal.ErrSomethingWentWrong
+	}
+	if len(mealsAux) != 0 {
+		return nil, internal.ErrMealAlreadyExist
+	}
+	return nil, nil
+}
 func (r *SQLiteMealRepository) ListMeals(userId string, filters models.MealsFilters) (meals []*models.Meal, err error) {
 	var mealsDB []models.MealDB
 	err = r.db.Conn.Select(&mealsDB, listMeals+applyFilters(filters), userId)

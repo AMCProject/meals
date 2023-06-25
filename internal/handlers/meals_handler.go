@@ -126,7 +126,7 @@ func (a *MealAPI) GetIngredients(c echo.Context) error {
 	return c.JSON(http.StatusOK, models.Ingredients)
 }
 
-func (a *MealAPI) GetExternalFoodsHandler(c echo.Context) error {
+func (a *MealAPI) GetAPIMealsHandler(c echo.Context) error {
 	filters := &models.ExternalMealFilter{}
 	if err := (&echo.DefaultBinder{}).BindQueryParams(c, filters); err != nil {
 		return internal.NewErrorResponse(c, err)

@@ -124,6 +124,26 @@ func (s *MealAPITestSuite) TestPostMealHandler() {
 			expectedStatusCode: http.StatusBadRequest,
 			wantErr:            true,
 		},
+		{
+			name:   "[005] Create new meal already exists (conflict error)",
+			userId: "01FN3EEB2NVFJAHAPU00000001",
+			reqBody: &models.Meal{
+				Name:        "Huevos fritos con patatas",
+				Description: "",
+				Image:       "",
+				Type:        "ocasional",
+				Ingredients: []string{"Patata frita", "Huevo frito"},
+				Seasons:     []string{"general"},
+			},
+			expectedResp: &internal.ErrorResponse{
+				Err: internal.ErrorBody{
+					Status:  http.StatusConflict,
+					Message: internal.ErrMealAlreadyExist.Error(),
+				},
+			},
+			expectedStatusCode: http.StatusConflict,
+			wantErr:            true,
+		},
 	}
 	getEchoContext := func(userId string, request interface{}) echo.Context {
 		var body []byte
@@ -711,6 +731,60 @@ func (s *MealAPITestSuite) TestDeleteMealHandler() {
 				s.NoError(jsoniter.Unmarshal(body, errorReturned))
 				s.Equal(errorReturned, t.expectedResp)
 			}
+			s.Equal(t.expectedStatusCode, c.Response().Status)
+		})
+	}
+}
+
+func (s *MealAPITestSuite) TestGetAPIMealsHandler() {
+	tests := []struct {
+		name               string
+		expectedRespLength int
+		expectedStatusCode int
+		wantErr            bool
+	}{
+		{
+			name:               "[001] Get external meals (ok)",
+			expectedRespLength: 20,
+			expectedStatusCode: http.StatusOK,
+			wantErr:            false,
+		},
+	}
+	getEchoContext := func() echo.Context {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, internal.RouteExternalMeals, nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		return c
+	}
+	for _, t := range tests {
+		s.Run(t.name, func() {
+			externalManager := managers.NewExternalMealsManager()
+			api := MealAPI{DB: *s.db, ExternalManager: externalManager}
+
+			c := getEchoContext()
+			err := api.GetAPIMealsHandler(c)
+
+			if t.wantErr {
+				s.Equal(t.wantErr, err != nil)
+				resp, ok := c.Response().Writer.(*httptest.ResponseRecorder)
+				s.True(ok)
+				body := resp.Body.Bytes()
+
+				errorReturned := new(internal.ErrorResponse)
+				s.NoError(jsoniter.Unmarshal(body, errorReturned))
+				s.Equal(errorReturned, t.expectedRespLength)
+			} else {
+				resp, ok := c.Response().Writer.(*httptest.ResponseRecorder)
+				s.True(ok)
+				body := resp.Body.Bytes()
+
+				actualMeal := new([]models.Meal)
+				s.NoError(jsoniter.Unmarshal(body, actualMeal))
+				s.Equal(len(*actualMeal), t.expectedRespLength)
+			}
+
 			s.Equal(t.expectedStatusCode, c.Response().Status)
 		})
 	}
