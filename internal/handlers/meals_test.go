@@ -10,7 +10,6 @@ import (
 	"meals/internal/managers"
 	"meals/internal/models"
 	"meals/internal/repositories"
-	"meals/internal/utils"
 	"meals/pkg/database"
 	"net/http"
 	"net/http/httptest"
@@ -23,7 +22,7 @@ var databaseTest = "/amc_test.db"
 type MealAPITestSuite struct {
 	suite.Suite
 	db       *database.Database
-	httpMock *utils.EndpointsMock
+	httpMock *internal.EndpointsMock
 }
 
 func TestMealAPITestSuite(t *testing.T) {
@@ -31,7 +30,7 @@ func TestMealAPITestSuite(t *testing.T) {
 }
 
 func (s *MealAPITestSuite) SetupTest() {
-	s.httpMock = &utils.EndpointsMock{}
+	s.httpMock = &internal.EndpointsMock{}
 	managers.Microservices = s.httpMock
 	_ = database.RemoveDB(databaseTest)
 	s.db = database.InitDB(databaseTest)
