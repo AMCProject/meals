@@ -28,6 +28,7 @@ func main() {
 	if err := config.LoadConfiguration(); err != nil {
 		log.Fatal(err)
 	}
+
 	db := database.InitDB(config.Config.DBName)
 	e := setUpServer(db)
 	e.Logger.Fatal(e.Start(config.Config.Host + ":" + config.Config.Port))
